@@ -17,6 +17,7 @@ users = {}
 
 @app.post('/post')
 def create_post():
+    global users, posts
     message = request.get_json(force = True)
     if not request.json or 'msg' not in message:
         abort(400)
@@ -29,10 +30,12 @@ def create_post():
         user_id = message['user_id']
         user_key = message['user_key']
         if user_id not in users:
-            users['user_id'] = user_id
-            users['user_key'] = [user_key]
+            users[user_id] = [user_key]
         else:
-            users['user_key'].append(user_key)
+            if user_key not in users[user_id]:
+                users[user_id].append(user_key)
+            else:
+                return {'err': 'This user key already exists'}, 400
 
         post = {
             'id': post_id,
@@ -61,6 +64,7 @@ def create_post():
 @app.route('/post/<int:post_id>', methods=['GET'])
 @app.route('/post/<int:post_id>/<string:user_id>/<string:user_key>', methods=['GET'])
 def read_post(post_id, user_id=None, user_key=None):
+    global users, posts
     if user_id is None and user_key is None:
         post = next((p for p in posts if p['id'] == post_id), None)
     else:
@@ -75,6 +79,7 @@ def read_post(post_id, user_id=None, user_key=None):
 @app.route('/post/<int:post_id>/delete/<string:key>', methods=['DELETE'])
 @app.route('/post/<int:post_id>/delete/<string:key>/<string:user_id>/<string:user_key>', methods=['DELETE'])
 def delete_post(post_id, key, user_id=None, user_key=None):
+    global users, posts
     if user_id is None and user_key is None:
         post = next((p for p in posts if p['id'] == post_id), None)
     else:
