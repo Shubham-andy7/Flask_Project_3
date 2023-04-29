@@ -30,12 +30,12 @@ def create_post():
         'timestamp': timestamp,
         'msg': message['msg']
     }
-    #Extension - 2(Threaded Replies)
-    if 'reply_to_id' in message:
-        reply_to_id = message.get('reply_to_id')
-        if not any(post['id'] == reply_to_id for post in posts):
-            return {'err': 'The post with provided reply_to_id does not exist.'}, 400
-        post.update({'reply_to_id': reply_to_id})
+    # #Extension - 2(Threaded Replies)
+    # if 'reply_to_id' in message:
+    #     reply_to_id = message.get('reply_to_id')
+    #     if not any(post['id'] == reply_to_id for post in posts):
+    #         return {'err': 'The post with provided reply_to_id does not exist.'}, 400
+    #     post.update({'reply_to_id': reply_to_id})
         
     #Extension - 1(User and User key)
     if 'user_id' in message and 'user_key' in message:
@@ -66,25 +66,23 @@ def create_post():
 @app.route('/post/<int:post_id>/<string:user_id>/<string:user_key>', methods=['GET'])
 def read_post(post_id, user_id=None, user_key=None):
     global users, posts
-    reply = 0
     if user_id is None and user_key is None:
         post = next((p for p in posts if p['id'] == post_id), None)
     else: #Extension - 1
         post = next((p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
-    for i in posts: #Extension - 2
-        if 'reply_to_id' in i:
-            reply_posts = [p for p in posts if p['reply_to_id'] == post['id']]
-            if reply_posts:
-                post['replies'] = reply_posts
-                reply += 1
-            else:
-                post['replies'] = None
+    # reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
+    # if reply_posts:
+    #     print("Hello")
+    #     post['replies'] = reply_posts
+
     if not post:
         abort(404)
-    if user_id is None and user_key is None and reply > 0:
-        return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg'], 'reply_to_id': post['reply_to_id'], 'replies': post['replies']})
-    elif user_id is not None and user_key is not None and reply > 0:
-        return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg'], 'user_id': post['user_id'], 'user_key': post['user_key']})
+    if user_id is None and user_key is None: 
+        # '''and reply_posts:'''
+        return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg']})
+        #, 'reply_to_id': post['reply_to_id'], 'replies': post['replies']
+    # elif user_id is not None and user_key is not None and reply_posts:
+    #     return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg'], 'user_id': post['user_id'], 'user_key': post['user_key']})
     else:
         return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg']})
 
@@ -101,11 +99,11 @@ def delete_post(post_id, key, user_id=None, user_key=None):
     if post['key'] != key:
         abort(403)
     posts.remove(post)
-    reply_posts = [p for p in posts if p['reply_to_id'] == post['id']] #Extension - 2
-    if reply_posts:
-        for reply in reply_posts:
-            posts.remove(reply)
-    print(posts)
+    # reply_posts = [p for p in posts if p['reply_to_id'] == post['id']] #Extension - 2
+    # if reply_posts:
+    #     for reply in reply_posts:
+    #         posts.remove(reply)
+    # print(posts)
 
     return jsonify(post)
 
