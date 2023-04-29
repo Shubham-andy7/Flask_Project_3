@@ -107,13 +107,13 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None):
         )
 
 @app.route('/post/<int:post_id>/delete/<string:key>', methods=['DELETE'])
-@app.route('/post/<int:post_id>/delete/<string:key>/<string:user_id>/<string:user_key>', methods=['DELETE'])
-def delete_post(post_id, key, user_id=None, user_key=None):
+@app.route('/post/<string:user_id>/delete/<string:user_key>', methods=['DELETE'])
+def delete_post(post_id=None, key=None, user_id=None, user_key=None):
     global users, posts
     if user_id is None and user_key is None:
         post = next((p for p in posts if p['id'] == post_id), None)
-    else:
-        post = next((p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
+    elif post_id is None and key is None:
+        post = next((p for p in posts if (p['user_id'] == user_id and p['user_key'] == user_key)), None)
     if not post:
         abort(404)
     if post['key'] != key:
