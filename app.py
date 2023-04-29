@@ -61,18 +61,23 @@ def create_post():
     return jsonify(post), 201
 
 @app.route('/post/<int:post_id>', methods=['GET'])
-@app.route('/post/<int:post_id>/<string:user_id>/<string:user_key>', methods=['GET'])
-def read_post(post_id, user_id=None, user_key=None):
+@app.route('/post/<string:user_id>/<string:user_key>', methods=['GET'])
+@app.route('/post/<string:full_search>', methods=['GET'])
+def read_post(post_id=None, user_id=None, user_key=None, full_search=None):
     global users, posts
-    if user_id is None and user_key is None:
+    if (user_id is None and user_key is None) and full_search is None and post_id is not None:
         post = next((p for p in posts if p['id'] == post_id), None)
+    elif (user_id is not None and user_key is not None) and full_search is None and post_id is None:
+        post = next((p for p in posts if (p['user_id'] == user_id and p['user_key'] == user_key)), None)
+    elif (user_id is not None and user_key is not None) and full_search is not None and post_id is None:
+        post = next((p for p in posts if (p['msg'] == full_search and p['user_id'] == user_id and p['user_key'] == user_key)), None)
     else:
-        post = next((p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
+        post = next((p for p in posts if (p['msg'] == full_search)), None)    
     reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
     reply_ids = [r['id'] for r in reply_posts]
     if not post:
         abort(404)
-    if user_id is None and user_key is None and reply_posts:
+    if user_id is None and user_key is None and reply_posts and full_search:
         return jsonify(
             {
                 'id': post['id'],
