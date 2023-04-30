@@ -1,10 +1,9 @@
-# Flask_Project_3
 **_Shubham Kulkarni_** skulkarn1@stevens.edu
 **_Mrinal Chandra Vinoth Kumar_** mvinothk@stevens.edu
 **_Buruju Sowmya_** sburuju@stevens.edu
 
 **_URL of our public GitHub repo_**
-
+https://github.com/Shubham-andy7/Flask_Project_3.git
 
 # Estimated hours spent on the project 
 We spent around 50 hours for this project.
