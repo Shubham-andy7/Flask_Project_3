@@ -88,11 +88,13 @@ def read_post(post_id=None, user_id=None, user_key=None, start_date_time=None, e
     # Parse start and end dates from query parameters
     if None not in [start_date_time, end_date_time]:
         if start_date_time:
-            start_date = datetime.fromisoformat(start_date_time)
+            start_date = datetime.datetime.fromisoformat(start_date_time[:-1])
+            print(start_date)
         else:
             start_date = datetime.datetime.min
         if end_date_time:
-            end_date = datetime.fromisoformat(end_date_time)
+            end_date = datetime.datetime.fromisoformat(end_date_time[:-1])
+            print(end_date)
         else:
             end_date = datetime.datetime.max
 
@@ -101,14 +103,16 @@ def read_post(post_id=None, user_id=None, user_key=None, start_date_time=None, e
         # Parse the datetime string with timezone information
 
         for post in posts:
-            time = parser.isoparse(post['timestamp'])
-            timestamp = datetime.datetime.fromisoformat(str(time))
+            time = post['timestamp']
+            timestamp = datetime.datetime.fromisoformat(str(time[:-1]))
+            print(timestamp)
             if start_date <= timestamp <= end_date:
                 filtered_posts.append(post)
+        print(filtered_posts)
 
     if not post:
         abort(404)
-    if user_id is None and user_key is None:
+    if user_id is None and user_key is None and (start_date_time is None or end_date_time is None):
         # '''and reply_posts:'''
         return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg']})
         # , 'reply_to_id': post['reply_to_id'], 'replies': post['replies']
