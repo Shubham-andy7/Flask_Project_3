@@ -2,23 +2,27 @@ from flask import Flask, jsonify, request, abort
 import secrets
 import datetime
 from secrets import randbelow
+from dateutil import parser
 
 app = Flask(__name__)
+
 
 @app.get("/random/<int:sides>")
 def roll(sides):
     if sides <= 0:
-        return { 'err': 'need a positive number of sides' }, 400
-    
-    return { 'num': randbelow(sides) + 1 }
+        return {'err': 'need a positive number of sides'}, 400
+
+    return {'num': randbelow(sides) + 1}
+
 
 posts = []
 users = {}
 
+
 @app.post('/post')
 def create_post():
     global users, posts
-    message = request.get_json(force = True)
+    message = request.get_json(force=True)
     if not request.json or 'msg' not in message:
         abort(400)
     post_id = len(posts) + 1
@@ -36,8 +40,8 @@ def create_post():
     #     if not any(post['id'] == reply_to_id for post in posts):
     #         return {'err': 'The post with provided reply_to_id does not exist.'}, 400
     #     post.update({'reply_to_id': reply_to_id})
-        
-    #Extension - 1(User and User key)
+
+    # Extension - 1(User and User key)
     if 'user_id' in message and 'user_key' in message:
         user_id = message['user_id']
         user_key = message['user_key']
@@ -55,36 +59,66 @@ def create_post():
         })
         posts.append(post)
         return jsonify(post), 201
-    
+
     if ('user_id' in message and 'user_key' not in message) or ('user_id' not in message and 'user_key' in message):
         return {'err': 'Please enter both User id and User Key'}, 400
-    
+
     posts.append(post)
     return jsonify(post), 201
 
+
 @app.route('/post/<int:post_id>', methods=['GET'])
 @app.route('/post/<int:post_id>/<string:user_id>/<string:user_key>', methods=['GET'])
-def read_post(post_id, user_id=None, user_key=None):
+@app.route('/post/<string:start_date_time>/<string:end_date_time>', methods=['GET'])
+def read_post(post_id=None, user_id=None, user_key=None, start_date_time=None, end_date_time=None):
+    print('inside read')
     global users, posts
     if user_id is None and user_key is None:
         post = next((p for p in posts if p['id'] == post_id), None)
-    else: #Extension - 1
-        post = next((p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
+    else:  # Extension - 1
+        post = next(
+            (p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
     # reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
     # if reply_posts:
     #     print("Hello")
     #     post['replies'] = reply_posts
 
+    # EXT-3
+
+    # Parse start and end dates from query parameters
+    if None not in [start_date_time, end_date_time]:
+        if start_date_time:
+            start_date = datetime.fromisoformat(start_date_time)
+        else:
+            start_date = datetime.datetime.min
+        if end_date_time:
+            end_date = datetime.fromisoformat(end_date_time)
+        else:
+            end_date = datetime.datetime.max
+
+        filtered_posts = []
+
+        # Parse the datetime string with timezone information
+
+        for post in posts:
+            time = parser.isoparse(post['timestamp'])
+            timestamp = datetime.datetime.fromisoformat(str(time))
+            if start_date <= timestamp <= end_date:
+                filtered_posts.append(post)
+
     if not post:
         abort(404)
-    if user_id is None and user_key is None: 
+    if user_id is None and user_key is None:
         # '''and reply_posts:'''
         return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg']})
-        #, 'reply_to_id': post['reply_to_id'], 'replies': post['replies']
+        # , 'reply_to_id': post['reply_to_id'], 'replies': post['replies']
     # elif user_id is not None and user_key is not None and reply_posts:
     #     return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg'], 'user_id': post['user_id'], 'user_key': post['user_key']})
+    elif start_date_time is not None or end_date_time is not None:
+        return jsonify(filtered_posts)
     else:
         return jsonify({'id': post['id'], 'timestamp': post['timestamp'], 'msg': post['msg']})
+
 
 @app.route('/post/<int:post_id>/delete/<string:key>', methods=['DELETE'])
 @app.route('/post/<int:post_id>/delete/<string:key>/<string:user_id>/<string:user_key>', methods=['DELETE'])
@@ -92,8 +126,9 @@ def delete_post(post_id, key, user_id=None, user_key=None):
     global users, posts
     if user_id is None and user_key is None:
         post = next((p for p in posts if p['id'] == post_id), None)
-    else: #Extension - 1
-        post = next((p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
+    else:  # Extension - 1
+        post = next(
+            (p for p in posts if (p['id'] == post_id and p['user_id'] == user_id and p['user_key'] == user_key)), None)
     if not post:
         abort(404)
     if post['key'] != key:
@@ -107,5 +142,6 @@ def delete_post(post_id, key, user_id=None, user_key=None):
 
     return jsonify(post)
 
+
 if __name__ == '__main__':
-    app.run()   
+    app.run()
