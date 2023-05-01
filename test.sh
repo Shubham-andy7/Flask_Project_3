@@ -1,4 +1,10 @@
 #!/bin/sh
+
+set -e # exit immediately if newman complains
+trap 'kill $PID' EXIT # kill the server on exit
+
+./run.sh &
+PID=$! # record the PID
 ## install jq before running this shell script : for mac it is brew install jq
 #Baseline - 1 create post
 response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://127.0.0.1:5000/post)
