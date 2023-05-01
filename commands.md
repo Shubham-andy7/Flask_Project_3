@@ -8,6 +8,9 @@ curl http://localhost:5000/post/1
 
 Invoke-WebRequest -Uri http://localhost:5000/post/<int>/delete/<string> -Method DELETE
 
+curl -X DELETE http://localhost:5000/post/1/delete/'15b4d5cd9c8193e19007c199bb6ad04f'
+
+
 curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__2, world!"}' http://localhost:5000/post
 
 curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__1, world!"}' http://localhost:5000/post
