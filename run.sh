@@ -1,5 +1,5 @@
 #!/bin/sh
 
-exec flask run
+flask run
 
 
