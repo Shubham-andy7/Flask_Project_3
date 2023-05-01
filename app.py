@@ -82,17 +82,23 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
     if None not in [start_date_time, end_date_time]:
         filtered_posts = date_range_query(start_date_time, end_date_time)
 
-
+    if post_id is not None:
+        return jsonify(
+            {
+                'id': post['id'],
+                'timestamp': post['timestamp'],
+                'msg': post['msg']
+            }
+        )
     # JUST some fun testing---
     start_date_str = request.args.get('start_date_time', default='2022-01-01T00:00:00Z')
     end_date_str = request.args.get('end_date_time', default='2122-01-01T00:00:00Z')
     posts_filtered = date_range_query(start_date_str, end_date_str)
-    print(posts_filtered)
-    print(start_date_str,end_date_str, posts[0]['timestamp'])
+    print(posts_filtered ,'postsFiltered')
 
-    if not post:
+    if not post and not posts_filtered:
         abort(404)
-    if user_id is None and user_key is None and reply_posts and full_search and (start_date_time is None or end_date_time is None):
+    if user_id is None and user_key is None and reply_posts and full_search and (start_date_str is None or end_date_str is None):
         return jsonify(
             {
                 'id': post['id'],
@@ -101,7 +107,7 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
                 'reply_ids': reply_ids
             }
         )
-    elif user_id is not None and user_key is not None and reply_posts and (start_date_time is None or end_date_time is None):
+    elif user_id is not None and user_key is not None and reply_posts and (start_date_str is None or end_date_str is None):
         return jsonify(
             {
                 'id': post['id'],
@@ -112,16 +118,16 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
                 'reply_ids': reply_ids
             }
         )
-    elif start_date_time is not None or end_date_time is not None:
-        return jsonify(filtered_posts)
-    else:
-        return jsonify(
-            {
-                'id': post['id'],
-                'timestamp': post['timestamp'],
-                'msg': post['msg']
-            }
-        )
+    elif start_date_str is not None or end_date_str is not None:
+        return jsonify(posts_filtered)
+    # else:
+    #     return jsonify(
+    #         {
+    #             'id': post['id'],
+    #             'timestamp': post['timestamp'],
+    #             'msg': post['msg']
+    #         }
+    #     )
 
 @app.route('/post/<int:post_id>/delete/<string:key>', methods=['DELETE'])
 @app.route('/post/<string:user_id>/delete/<string:user_key>', methods=['DELETE'])
