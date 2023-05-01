@@ -69,20 +69,23 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
     global users, posts
     if (user_id is None and user_key is None) and full_search is None and post_id is not None:
         post = next((p for p in posts if p['id'] == post_id), None)
-    elif (user_id is not None and user_key is not None) and full_search is None and post_id is None:
+    elif (user_id is not None and user_key is not None) or full_search is None and post_id is None:
+        print("hello")
         post = next((p for p in posts if (p['user_id'] == user_id and p['user_key'] == user_key)), None)
-    elif (user_id is not None and user_key is not None) and full_search is not None and post_id is None:
-        post = next((p for p in posts if (p['msg'] == full_search and p['user_id'] == user_id and p['user_key'] == user_key)), None)
+    # elif (user_id is not None and user_key is not None) and full_search is not None and post_id is None:
+    #     post = next((p for p in posts if (p['msg'] == full_search and p['user_id'] == user_id and p['user_key'] == user_key)), None)
     else:
-        post = next((p for p in posts if (p['msg'] == full_search)), None)    
-    reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
-    reply_ids = [r['id'] for r in reply_posts]
+        print("hello1")
+        post = next((p for p in posts if (p['msg'] == full_search)), None)
+    count = 0
+    if post is not None and 'id' in post:
+        count = 1
+        reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
+        reply_ids = [r['id'] for r in reply_posts]
 
     # Extension-3
-    if None not in [start_date_time, end_date_time]:
-        filtered_posts = date_range_query(start_date_time, end_date_time)
 
-    if post_id is not None:
+    if post_id is not None and reply_posts == []:
         return jsonify(
             {
                 'id': post['id'],
@@ -94,11 +97,11 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
     start_date_str = request.args.get('start_date_time', default='2022-01-01T00:00:00Z')
     end_date_str = request.args.get('end_date_time', default='2122-01-01T00:00:00Z')
     posts_filtered = date_range_query(start_date_str, end_date_str)
-    # print(posts_filtered ,'postsFiltered')
+
 
     if not post and not posts_filtered:
         abort(404)
-    if user_id is None and user_key is None and reply_posts and full_search and (start_date_str is None or end_date_str is None):
+    if user_id is None and user_key is None and count == 1 or full_search or (start_date_str is None or end_date_str is None):
         return jsonify(
             {
                 'id': post['id'],
@@ -107,7 +110,7 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
                 'reply_ids': reply_ids
             }
         )
-    elif user_id is not None and user_key is not None and reply_posts and (start_date_str is None or end_date_str is None):
+    elif user_id is not None and user_key is not None and count == 1 and (start_date_str is None or end_date_str is None):
         return jsonify(
             {
                 'id': post['id'],
