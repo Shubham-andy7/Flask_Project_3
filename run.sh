@@ -1,5 +1,5 @@
 #!/bin/sh
-
+## install jq before running this shell script : for mac it is brew install jq
 #Baseline - 1 create post
 response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post)
 key=$(echo $response | jq -r '.key')
