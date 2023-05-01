@@ -1,15 +1,20 @@
+#!/bin/sh
+## install jq before running this shell script : for mac it is brew install jq
+#Baseline - 1 create post
+response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post)
+key=$(echo $response | jq -r '.key')
+id=$(echo $response | jq -r '.id')
+echo $response
+echo $key
 
-# #!/bin/sh
-# ./run.sh
+##Baseline - 2 read post
+get_response=$(curl http://localhost:5000/post/$id)
+echo $get_response
+#
 
-# #Baseline - 1 create post
-# post = curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post
-
-# #Baseline - 2 read post
-# curl http://localhost:5000/post/1
-
-# #Baseline - 3 delete post
-# curl http://localhost:5000/post/1/delete/<string:key>
+##Baseline - 3 delete post
+echo "$key"
+curl -X DELETE http://localhost:5000/post/1/delete/"$key"
 
 # #Extension - 1 User and User Keys
 # post =  curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!", "user_id": "123", "user_key": "12345"}' http://localhost:5000/post
