@@ -1,4 +1,5 @@
 #!/bin/sh
 
-# uncomment the line below to install some-package
-# pip3 install some-package
+pip3 install flask
+pip3 install secrets
+pip3 install datetime
