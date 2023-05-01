@@ -37,6 +37,8 @@ def create_post():
         post.update({'reply_to_id': reply_to_id})
         
     if 'user_id' in message and 'user_key' in message:
+        if type(message['user_key']) != int:
+            return {'err': 'User Key should be integer type'}, 400
         user_id = message['user_id']
         user_key = message['user_key']
         if user_id not in users:
@@ -52,6 +54,7 @@ def create_post():
             'user_key': user_key
         })
         posts.append(post)
+        print(posts)
         return jsonify(post), 201
 
     if ('user_id' in message and 'user_key' not in message) or ('user_id' not in message and 'user_key' in message):
@@ -61,23 +64,46 @@ def create_post():
     return jsonify(post), 201
 
 @app.route('/post/<int:post_id>', methods=['GET'])
-@app.route('/post/<string:user_id>/<string:user_key>', methods=['GET'])
+@app.route('/post/<string:user_id>/<int:user_key>', methods=['GET'])
 @app.route('/post/<string:full_search>', methods=['GET'])
-def read_post(post_id=None, user_id=None, user_key=None, full_search=None, start_datetime = None, end_datetime = None):
+@app.route('/post/<string:start_date_time>/<string:end_date_time>', methods=['GET'])
+@app.route('/posts', methods=['GET'])
+def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_date_time=None, end_date_time=None):
     global users, posts
-    if (user_id is None and user_key is None) and full_search is None and post_id is not None:
+    if post_id is not None:
         post = next((p for p in posts if p['id'] == post_id), None)
-    elif (user_id is not None and user_key is not None) and full_search is None and post_id is None:
+    elif full_search is not None:
+        full_post = next((p for p in posts if (p['msg'] == full_search)), None)
+        post = full_post
+    elif user_id is not None and user_key is not None:
+        print('HEY')
         post = next((p for p in posts if (p['user_id'] == user_id and p['user_key'] == user_key)), None)
-    elif (user_id is not None and user_key is not None) and full_search is not None and post_id is None:
-        post = next((p for p in posts if (p['msg'] == full_search and p['user_id'] == user_id and p['user_key'] == user_key)), None)
+        print(post)
     else:
-        post = next((p for p in posts if (p['msg'] == full_search)), None)    
+        post = None
     reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
     reply_ids = [r['id'] for r in reply_posts]
-    if not post:
+
+    # Extension-3
+    # JUST some fun testing---
+    start_date_str = request.args.get('start_date_time', default='2022-01-01T00:00:00Z')
+    end_date_str = request.args.get('end_date_time', default='2122-01-01T00:00:00Z')
+    posts_filtered = date_range_query(start_date_str, end_date_str)
+
+
+    if not post and not posts_filtered:
         abort(404)
-    if user_id is None and user_key is None and reply_posts or full_search:
+    if post_id is not None and reply_posts == []:
+        return jsonify(
+            {
+                'id': post['id'],
+                'timestamp': post['timestamp'],
+                'msg': post['msg']
+            }
+        )
+    elif full_search:
+        return jsonify(full_post)
+    elif reply_posts:
         return jsonify(
             {
                 'id': post['id'],
@@ -86,7 +112,7 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None, start
                 'reply_ids': reply_ids
             }
         )
-    elif user_id is not None and user_key is not None and reply_posts:
+    elif user_id is not None and user_key is not None:
         return jsonify(
             {
                 'id': post['id'],
@@ -97,14 +123,16 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None, start
                 'reply_ids': reply_ids
             }
         )
-    else:
-        return jsonify(
-            {
-                'id': post['id'],
-                'timestamp': post['timestamp'],
-                'msg': post['msg']
-            }
-        )
+    elif start_date_str is not None or end_date_str is not None:
+        return jsonify(posts_filtered)
+    # else:
+    #     return jsonify(
+    #         {
+    #             'id': post['id'],
+    #             'timestamp': post['timestamp'],
+    #             'msg': post['msg']
+    #         }
+    #     )
 
 @app.route('/post/<int:post_id>/delete/<string:key>', methods=['DELETE'])
 @app.route('/post/<string:user_id>/delete/<string:user_key>', methods=['DELETE'])
@@ -124,6 +152,30 @@ def delete_post(post_id=None, key=None, user_id=None, user_key=None):
         for reply in reply_posts:
             posts.remove(reply)
     return jsonify(post)
+
+def date_range_query(start_date_time,end_date_time):
+    if start_date_time:
+        start_date = datetime.datetime.fromisoformat(start_date_time[:-1])
+        # print(start_date)
+    else:
+        start_date = datetime.datetime.min
+    if end_date_time:
+        end_date = datetime.datetime.fromisoformat(end_date_time[:-1])
+        # print(end_date)
+    else:
+        end_date = datetime.datetime.max
+
+    filtered_posts = []
+
+    # Parse the datetime string with timezone information
+
+    for post in posts:
+        time = post['timestamp']
+        timestamp = datetime.datetime.fromisoformat(str(time[:-1]))
+        # print(timestamp)
+        if start_date <= timestamp <= end_date:
+            filtered_posts.append(post)
+    return filtered_posts
 
 if __name__ == '__main__':
     app.run()   
