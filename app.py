@@ -94,7 +94,7 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None,start_
     start_date_str = request.args.get('start_date_time', default='2022-01-01T00:00:00Z')
     end_date_str = request.args.get('end_date_time', default='2122-01-01T00:00:00Z')
     posts_filtered = date_range_query(start_date_str, end_date_str)
-    print(posts_filtered ,'postsFiltered')
+    # print(posts_filtered ,'postsFiltered')
 
     if not post and not posts_filtered:
         abort(404)
@@ -151,12 +151,12 @@ def delete_post(post_id=None, key=None, user_id=None, user_key=None):
 def date_range_query(start_date_time,end_date_time):
     if start_date_time:
         start_date = datetime.datetime.fromisoformat(start_date_time[:-1])
-        print(start_date)
+        # print(start_date)
     else:
         start_date = datetime.datetime.min
     if end_date_time:
         end_date = datetime.datetime.fromisoformat(end_date_time[:-1])
-        print(end_date)
+        # print(end_date)
     else:
         end_date = datetime.datetime.max
 
@@ -167,7 +167,7 @@ def date_range_query(start_date_time,end_date_time):
     for post in posts:
         time = post['timestamp']
         timestamp = datetime.datetime.fromisoformat(str(time[:-1]))
-        print(timestamp)
+        # print(timestamp)
         if start_date <= timestamp <= end_date:
             filtered_posts.append(post)
     return filtered_posts
