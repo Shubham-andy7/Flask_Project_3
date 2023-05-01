@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Baseline - 1 create post
-post = curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post
+response=$(curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post)
 
 #Baseline - 2 read post
 curl http://localhost:5000/post/1
