@@ -1,10 +1,6 @@
 #!/bin/sh
 
-set -e # exit immediately if newman complains
-trap 'kill $PID' EXIT # kill the server on exit
-
-./run.sh &
-PID=$! # record the PID
+./run.sh
 
 echo "Baseline - 1 create post"
 response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post)
