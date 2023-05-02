@@ -5,4 +5,4 @@
 # pip3 install datetime
 # pip3 install jq
 
-brew install jq
+# brew install jq
