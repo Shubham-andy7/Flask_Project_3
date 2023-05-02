@@ -1,5 +1,5 @@
 #!/bin/sh
-flask run &
+./run.sh &
 PID=$!
 
 sleep 5
