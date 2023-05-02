@@ -1,5 +1,5 @@
 #!/bin/sh
-./run.sh &
+python app.py &
 
 sleep 5
 echo "Baseline - 1 create post"
