@@ -75,7 +75,6 @@ def create_post():
 def read_post(post_id=None, user_id=None, user_key=None, full_search=None, start_date_time=None, end_date_time=None):
     global users, posts
     count = 0
-    print(full_search)
     if post_id is not None:
         post = next((p for p in posts if p['id'] == post_id), None)
         reply_posts = [p for p in posts if 'reply_to_id' in p and p['reply_to_id'] == post['id']]
@@ -87,22 +86,16 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None, start
         post = None
         for p in posts:
             if p['msg'] == full_search:
-                print(p['msg'], full_search)
                 post = p
                 break
         full_post = post
-        print(post, post==f"{full_search}",full_search)
     elif user_id is not None and user_key is not None:
-        print('HEY')
-        # post = next((p for p in posts if (p['user_id'] == user_id and p['user_key'] == user_key)), None)
         post = next((p for p in posts if
                      ('user_id' in p and p['user_id'] == user_id and 'user_key' in p and p['user_key'] == user_key)),
                     None)
-        print(post)
     else:
         post = None
     # Extension-3
-    # JUST some fun testing---
     start_date_str = request.args.get('start_date_time', default='2022-01-01T00:00:00Z')
     end_date_str = request.args.get('end_date_time', default='2122-01-01T00:00:00Z')
     posts_filtered = date_range_query(start_date_str, end_date_str)
@@ -140,14 +133,6 @@ def read_post(post_id=None, user_id=None, user_key=None, full_search=None, start
         )
     elif start_date_str is not None or end_date_str is not None:
         return jsonify(posts_filtered)
-    # else:
-    #     return jsonify(
-    #         {
-    #             'id': post['id'],
-    #             'timestamp': post['timestamp'],
-    #             'msg': post['msg']
-    #         }
-    #     )
 
 
 @app.route('/post/<int:post_id>/delete/<string:key>', methods=['DELETE'])

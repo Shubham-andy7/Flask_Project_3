@@ -1,3 +1,3 @@
 #!/bin/sh
 
-exec flask run
+python app.py

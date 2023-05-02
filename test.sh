@@ -1,11 +1,11 @@
 #!/bin/sh
-python app.py &
+./run.sh &
 
-sleep 10
+sleep 5
 echo "Baseline - 1 create post"
 response=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post)
-key=$(echo $response | jq -r '.key')
-id=$(echo $response | jq -r '.id')
+key=$( echo $response | sed -E 's/.*"key":"([^"]+)".*/\1/')
+id=$(echo $response | sed -n 's/.*"id":\([^,}]*\).*/\1/p')
 echo $response
 echo $key
 
@@ -14,17 +14,17 @@ get_response=$(curl http://localhost:5000/post/$id)
 echo $get_response
 #
 echo "Extension - 1 User and User Keys"
-user_id_key_reps=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!", "user_id": "123", "user_key": 12345}' http://localhost:5000/post)
+user_id_key_reps=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon", "user_id": "123", "user_key": 12345}' http://localhost:5000/post)
 echo $user_id_key_reps
-start_date_str=$(echo $response | jq -r '.timestamp')
+start_date_str=$(echo $response | sed -n 's/.*"timestamp":"\([^"]*\)".*/\1/p')
 echo $start_date_str
 
 
 echo "Extension - 2 Threaded Replies"
 treplies=$(curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!", "reply_to_id": 1}' http://localhost:5000/post)
 echo $treplies
-reply_to_id=$(echo $treplies | jq -r '.reply_to_id')
-echo $(curl http://localhost:5000/post/$reply_to_id)
+reply_to_id=$(echo $treplies | sed -n 's/.*"reply_to_id":[[:space:]]*\([^"]*\).*/\1/p')
+echo $(curl http://localhost:5000/post/1)
 
 echo "Extension - 3 DateTime Based Queries"
 curl -X GET "http://localhost:5000/posts?start_date_time=$start_date_str"
@@ -33,7 +33,7 @@ echo Extension - 4 User Based Queries
 echo $(curl http://localhost:5000/post/'123'/12345)
 
 echo "Extension - 5 FullText Search"
-echo $(curl http://localhost:5000/post/"demon slayer__0, world!")
+echo $(curl http://localhost:5000/post/demon)
 
 echo "Baseline - 3 delete post"
 echo "$key"
