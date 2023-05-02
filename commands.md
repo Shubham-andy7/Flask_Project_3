@@ -18,4 +18,5 @@ curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__1, w
 curl -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post
 
 
-curl -X GET "http://localhost:5000/posts?start_date_time=2023-05-01T01:30:47Z"
+curl -X GET "http://localhost:5000/posts?start_date_time=2023-05-02T00:37:54Z"
+curl -X GET "http://localhost:5000/posts?end_date_time=2023-05-02T00:38:43Z"
