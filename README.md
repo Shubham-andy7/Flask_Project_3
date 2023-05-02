@@ -22,22 +22,46 @@ To test the provided code, we used following the steps below:
 
 - Create a new post:
   ```bash
-  curl -X POST -H "Content-Type: application/json" -d '{"msg": "Hello, world!"}' http://localhost:5000/post
+  curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon"}' http://localhost:5000/post
+  ```
+
+- Read post
+  ```bash
+  curl http://localhost:5000/post/$id
   ```
 
 - Retrieve all posts:
   ```bash
   curl http://localhost:5000/post/
   ```
-
+- Extension - 1 User and User Keys
+  ```bash
+  curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!", "user_id": "123", "user_key": 12345}' http://localhost:5000/post
+  ```
+- Extension - 2 Threaded Replies
+  ```bash
+  curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!", "reply_to_id": 1}' http://localhost:5000/post
+  ```
+- Extension - 3 DateTime Based Queries
+  ```bash
+  curl -X GET "http://localhost:5000/posts?start_date_time=$start_date_str"
+  ```
+- Extension - 4 User Based Queries
+```bash
+  curl http://localhost:5000/post/'123'/12345
+  ```
+- Extension - 5 FullText Search
+```bash
+  curl http://localhost:5000/post/demon
+  ```
 - Delete a post by ID and key:
   ```bash
-  curl -X DELETE http://localhost:5000/post/1/delete/your_key_here
+  curl -X DELETE http://localhost:5000/post/1/delete/"$key"
   ```
 
 - Delete a post by user ID and user key:
   ```bash
-  curl -X DELETE http://localhost:5000/post/your_user_id_here/delete/your_user_key_here
+  curl -X DELETE http://localhost:5000/post/1/delete/"$key"
   ```
 
 Please note that you need to replace the placeholders (`your_key_here` and `your_user_id_here`, `your_user_key_here`) with the actual values.
@@ -63,7 +87,7 @@ Code functionality. Flask API with the following endpionts:
 
 
 # Bugs or issues that are not resolve #
-
+There are no bugs and issues for now on
 
 # Example of a difficult issue or bug and we resolved #
 
