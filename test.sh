@@ -1,5 +1,5 @@
 #!/bin/sh
-python app.py &
+flask run &
 
 sleep 5
 echo "Baseline - 1 create post"
