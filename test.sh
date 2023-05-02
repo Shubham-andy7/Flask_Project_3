@@ -1,8 +1,5 @@
 #!/bin/sh
 
-set -e # exit immediately if newman complains
-trap 'kill $PID' EXIT # kill the server on exit
-
 ./run.sh &
 PID=$!
 #exec flask run
@@ -42,3 +39,5 @@ echo $(curl http://localhost:5000/post/"demon slayer__0, world!")
 echo "Baseline - 3 delete post"
 echo "$key"
 curl -X DELETE http://localhost:5000/post/1/delete/"$key"
+
+trap 'kill $PID' EXIT # kill the server on exit
