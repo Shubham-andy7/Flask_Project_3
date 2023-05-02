@@ -1,5 +1,6 @@
 #!/bin/sh
 flask run &
+PID=$!
 
 sleep 5
 echo "Baseline - 1 create post"
@@ -39,6 +40,6 @@ echo "Baseline - 3 delete post"
 echo "$key"
 curl -X DELETE http://localhost:5000/post/1/delete/"$key"
 
-#trap 'kill $PID' EXIT # kill the server on exit
+trap 'kill $PID' EXIT # kill the server on exit
 
-kill %1
+# kill %1
