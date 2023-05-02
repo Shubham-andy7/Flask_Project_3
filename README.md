@@ -22,7 +22,7 @@ To test the provided code, we used following the steps below:
 
 - Create a new post:
   ```bash
-  curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon slayer__0, world!"}' http://localhost:5000/post
+  curl -s -X POST -H "Content-Type: application/json" -d '{"msg": "demon"}' http://localhost:5000/post
   ```
 
 - Read post
@@ -52,7 +52,7 @@ To test the provided code, we used following the steps below:
   ```
 - Extension - 5 FullText Search
 ```bash
-  curl http://localhost:5000/post/"demon slayer__0, world!"
+  curl http://localhost:5000/post/demon
   ```
 - Delete a post by ID and key:
   ```bash
